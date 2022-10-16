@@ -1,0 +1,61 @@
+using System;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Windows.Forms;
+ 
+namespace SimpleAV
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+ 
+        public string MD5GetFromFile(string filenPath)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filenPath))
+                {
+                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower();
+                }
+            }
+        }
+ 
+ 
+        private void scanMD5_Click(object sender, EventArgs e)
+        {
+            var md5signatures = File.ReadAllLines("MD5base.txt");
+            if (md5signatures.Contains(tbMD5.Text))
+            {
+                lblStatus.Text = "OOPS! MD5 is Infected!";
+                lblStatus.ForeColor = Color.Red;
+            }
+ 
+            else
+            {
+                lblStatus.Text = "Your file is good to go!";
+                lblStatus.ForeColor = Color.Green;
+            }
+ 
+        }
+ 
+        private void brwosefile_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openfd = new OpenFileDialog();
+            openfd.Filter = "Textfiles | *.txt";
+            if (openfd.ShowDialog() == DialogResult.OK)
+            {
+                tbMD5.Text = MD5GetFromFile(openfd.FileName);
+            }
+        }
+ 
+        private void exitbutton_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+    }
+}
